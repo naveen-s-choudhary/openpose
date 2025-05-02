@@ -1,0 +1,8 @@
+openpose_wrapper.py
+setup.py
+openpose/__init__.py
+openpose_python.egg-info/PKG-INFO
+openpose_python.egg-info/SOURCES.txt
+openpose_python.egg-info/dependency_links.txt
+openpose_python.egg-info/requires.txt
+openpose_python.egg-info/top_level.txt

@@ -102,9 +102,15 @@ elseif (UNIX)
   add_definitions(-std=c++11)
   set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 elseif (APPLE)
-  # Turn on C++11
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+  # Turn on C++14
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -DUSE_ACCELERATE")
   set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+  
+  # Find Accelerate framework for macOS
+  find_library(ACCELERATE_LIBRARY Accelerate)
+  if (ACCELERATE_LIBRARY)
+    message(STATUS "Found Accelerate: ${ACCELERATE_LIBRARY}")
+  endif (ACCELERATE_LIBRARY)
 endif (WIN32)
 
 # C++ additional flags
@@ -866,7 +872,7 @@ if (NOT ${WITH_EIGEN} MATCHES "NONE")
 endif (NOT ${WITH_EIGEN} MATCHES "NONE")
 
 if (APPLE)
-  include_directories("/usr/local/opt/openblas/include")
+  include_directories("/opt/homebrew/opt/openblas/include")
 endif (APPLE)
 
 if (USE_MKL)
@@ -910,6 +916,9 @@ endif (WIN32)
 ### COLLECT ALL 3RD-PARTY LIBRARIES TO BE LINKED AGAINST
 if (UNIX OR APPLE)
   set(OpenPose_3rdparty_libraries ${OpenPose_3rdparty_libraries} ${OpenCV_LIBS} ${GLOG_LIBRARY})
+  if (APPLE AND ACCELERATE_LIBRARY)
+    set(OpenPose_3rdparty_libraries ${OpenPose_3rdparty_libraries} ${ACCELERATE_LIBRARY})
+  endif (APPLE AND ACCELERATE_LIBRARY)
 elseif (WIN32)
   set(OpenPose_3rdparty_libraries ${OpenPose_3rdparty_libraries}
       debug ${OpenCV_LIBS_DEBUG} optimized ${OpenCV_LIBS_RELEASE}
