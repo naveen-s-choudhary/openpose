@@ -40,14 +40,14 @@ opWrapper.start()
 # ---- Start ZeroMQ Server ----
 context = zmq.Context()
 socket = context.socket(zmq.REP)
-socket.bind("tcp://127.0.0.1:8080")
+socket.bind("tcp://127.0.0.1:8081")
 
-print("✅ OpenPose ZMQ server running on port 8080...")
+print("✅ OpenPose ZMQ server running on port 8081...")
 
 while True:
     # Receive and decode image
     b64_data = socket.recv()
-    print("Received image", b64_data)
+    print("Received image")
     image_bytes = base64.b64decode(b64_data)
     nparr = np.frombuffer(image_bytes, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
@@ -56,12 +56,14 @@ while True:
     datum = op.Datum()
     datum.cvInputData = img
     
-    # Create a std::vector<std::shared_ptr<op::Datum>> instead of a Python list
-    datumsPtr = op.VectorDatum()
-    datumsPtr.push_back(datum)
-    opWrapper.emplaceAndPop(datumsPtr)
+    # Create a vector of datum
+    datumPtr = op.VectorDatum()
+    # Add datum to vector (append used in Python rather than push_back)
+    datumPtr.append(datum)
+    opWrapper.emplaceAndPop(datumPtr)
 
     keypoints = datum.poseKeypoints.tolist() if datum.poseKeypoints is not None else []
+    print("Keypoints", keypoints)
 
     # Send keypoints back
     socket.send_json({"pose_keypoints": keypoints})
